@@ -50,12 +50,38 @@ int connect_to_server(const char *hostname, int port)
 
 int send_post_request(int sockfd, const char *data)
 {
-    printf("Sends POST-request... (not implemented)\n");
+
+    const char *request_template =
+        "POST /post HTTP/1.1\r\n"
+        "Host: httpbin.org\r\n"
+        "Content-Type: application/json\r\n"
+        "Content-Length: %zu\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "%s";
+
+    char request[1024];
+    int len = snprintf(request, sizeof(request), request_template, strlen(data), data);
+
+    if (len >= (int)sizeof(request))
+    {
+        fprintf(stderr, "POST-data to big!\n");
+        return -1;
+    }
+
+    ssize_t sent = write(sockfd, request, len);
+    if (sent < 0)
+    {
+        perror("write");
+        return -1;
+    }
+
+    printf("POST-request sent (%zd byte)\n", sent);
     return 0;
 }
 
 int receive_response(int sockfd)
 {
-    printf("Tar emot svar... (not implemented)\n");
+    printf("Received response... (not implemented)\n");
     return 0;
 }
