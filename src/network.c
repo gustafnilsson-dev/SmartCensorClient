@@ -1,20 +1,61 @@
+#define _POSIX_C_SOURCE 200112L
 #include "network.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 int connect_to_server(const char *hostname, int port)
 {
-    printf("Ansluter till %s:%d ... (ej implementerad ännu)\n", hostname, port);
+    struct addrinfo hints, *res, *p;
+    int sockfd;
+    char port_str[6];
+
+    snprintf(port_str, sizeof(port_str), "%d", port);
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;     // IPv4 eller IPv6
+    hints.ai_socktype = SOCK_STREAM; // TCP
+
+    int status = getaddrinfo(hostname, port_str, &hints, &res);
+    if (status != 0)
+    {
+        fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+        return -1;
+    }
+
+    for (p = res; p != NULL; p = p->ai_next)
+    {
+        sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (sockfd == -1)
+            continue;
+
+        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == 0)
+        {
+
+            freeaddrinfo(res);
+            printf("Connected to: %s:%d\n", hostname, port);
+            return sockfd;
+        }
+
+        close(sockfd);
+    }
+
+    fprintf(stderr, " Couldn't connect to: %s:%d\n", hostname, port);
+    freeaddrinfo(res);
     return -1;
 }
 
 int send_post_request(int sockfd, const char *data)
 {
-    printf("Skickar POST-request... (ej implementerad ännu)\n");
+    printf("Sends POST-request... (not implemented)\n");
     return 0;
 }
 
 int receive_response(int sockfd)
 {
-    printf("Tar emot svar... (ej implementerad ännu)\n");
+    printf("Tar emot svar... (not implemented)\n");
     return 0;
 }

@@ -1,4 +1,4 @@
-# Makefile för TCP POST klient
+
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
