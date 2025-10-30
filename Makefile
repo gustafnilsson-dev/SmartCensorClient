@@ -1,5 +1,3 @@
-
-
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
 OBJ = src/main.o src/network.o

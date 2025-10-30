@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200112L
+#define _POSIX_C_SOURCE 200112L // For getaddrinfo(), freeaddrinfo() and struct addrinfo (POSIX-standard)
 #include "network.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,6 +43,12 @@ int connect_to_server(const char *hostname, int port)
         close(sockfd);
     }
 
+    freeaddrinfo(res);
+
+    if (p == NULL)
+        return -1;
+    return sockfd;
+
     fprintf(stderr, " Couldn't connect to: %s:%d\n", hostname, port);
     freeaddrinfo(res);
     return -1;
@@ -80,8 +86,25 @@ int send_post_request(int sockfd, const char *data)
     return 0;
 }
 
-int receive_response(int sockfd)
+int receive_response_with_handler(int sockfd, ResponseHandler handler)
 {
-    printf("Received response... (not implemented)\n");
+    char buffer[4096];
+    int bytes;
+
+    printf("Receiving response from server...\n");
+    while ((bytes = read(sockfd, buffer, sizeof(buffer) - 1)) > 0)
+    {
+        buffer[bytes] = '\0';
+        if (handler)
+            handler(buffer);
+    }
+
+    if (bytes < 0)
+    {
+        perror("read");
+        return -1;
+    }
+
+    printf("\nServer closed connection.\n");
     return 0;
 }
